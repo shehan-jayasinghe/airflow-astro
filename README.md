@@ -1,45 +1,69 @@
-Overview
-========
+# Airflow Astro Project
 
-Welcome to Astronomer! This project was generated after you ran 'astro dev init' using the Astronomer CLI. This readme describes the contents of the project, as well as how to run Apache Airflow on your local machine.
+An Apache Airflow project scaffolded for the Astronomer Runtime, with DAGs, tests, Docker configuration, and local development support.
 
-Project Contents
-================
+## Overview
 
-Your Astro project contains the following files and folders:
+This repository is an Astro/Astronomer Airflow project. Workflows are defined as Python DAGs under `dags/`, with the project packaged and run locally through the Astro CLI and Docker.
 
-- dags: This folder contains the Python files for your Airflow DAGs. By default, this directory includes one example DAG:
-    - `example_astronauts`: This DAG shows a simple ETL pipeline example that queries the list of astronauts currently in space from the Open Notify API and prints a statement for each astronaut. The DAG uses the TaskFlow API to define tasks in Python, and dynamic task mapping to dynamically print a statement for each astronaut. For more on how this DAG works, see our [Getting started tutorial](https://www.astronomer.io/docs/learn/get-started-with-airflow).
-- Dockerfile: This file contains a versioned Astro Runtime Docker image that provides a differentiated Airflow experience. If you want to execute other commands or overrides at runtime, specify them here.
-- include: This folder contains any additional files that you want to include as part of your project. It is empty by default.
-- packages.txt: Install OS-level packages needed for your project by adding them to this file. It is empty by default.
-- requirements.txt: Install Python packages needed for your project by adding them to this file. It is empty by default.
-- plugins: Add custom or community plugins for your project to this file. It is empty by default.
-- airflow_settings.yaml: Use this local-only file to specify Airflow Connections, Variables, and Pools instead of entering them in the Airflow UI as you develop DAGs in this project.
+## Architecture
 
-Deploy Your Project Locally
-===========================
+```text
+                 Astro / Docker
+                       |
+        +--------------+--------------+
+        |              |              |
+     Scheduler      DAG Processor   API Server
+        |              |              |
+        +--------------+--------------+
+                       |
+                    Triggerer
+                       |
+                    Postgres
+              (Airflow metadata DB)
+                       |
+                       v
+                 Python DAGs
+```
 
-Start Airflow on your local machine by running 'astro dev start'.
+## Repository Structure
 
-This command will spin up five Docker containers on your machine, each for a different Airflow component:
+- `dags/` — Airflow DAG definitions.
+- `tests/` — DAG/project tests.
+- `Dockerfile` — Astro Runtime image configuration.
+- `requirements.txt` — Python dependencies.
+- `packages.txt` — OS-level packages.
+- `include/` — additional project files when required.
+- `.astro/` — Astro project metadata/configuration.
 
-- Postgres: Airflow's Metadata Database
-- Scheduler: The Airflow component responsible for monitoring and triggering tasks
-- DAG Processor: The Airflow component responsible for parsing DAGs
-- API Server: The Airflow component responsible for serving the Airflow UI and API
-- Triggerer: The Airflow component responsible for triggering deferred tasks
+## Local Development
 
-When all five containers are ready the command will open the browser to the Airflow UI at http://localhost:8080/. You should also be able to access your Postgres Database at 'localhost:5432/postgres' with username 'postgres' and password 'postgres'.
+Install the Astro CLI, then start the project:
 
-Note: If you already have either of the above ports allocated, you can either [stop your existing Docker containers or change the port](https://www.astronomer.io/docs/astro/cli/troubleshoot-locally#ports-are-not-available-for-my-local-airflow-webserver).
+```bash
+astro dev start
+```
 
-Deploy Your Project to Astronomer
-=================================
+The local Airflow UI is available at:
 
-If you have an Astronomer account, pushing code to a Deployment on Astronomer is simple. For deploying instructions, refer to Astronomer documentation: https://www.astronomer.io/docs/astro/deploy-code/
+```text
+http://localhost:8080
+```
 
-Contact
-=======
+The Astro development environment runs Airflow components in Docker containers, including the scheduler, DAG processor, API server, triggerer, and PostgreSQL metadata database.
 
-The Astronomer CLI is maintained with love by the Astronomer team. To report a bug or suggest a change, reach out to our support.
+## DAG Development
+
+Add or modify Python workflows under `dags/`. Keep DAGs focused on orchestration and move reusable business logic into testable Python modules where appropriate.
+
+## Testing
+
+Project tests are located under `tests/`. Run the repository's configured test suite from the project environment before deploying workflow changes.
+
+## Deployment
+
+The repository can be deployed through Astronomer. Keep deployment credentials and environment-specific connections outside source control.
+
+## Project Status
+
+This is an Airflow/Astro workflow project suitable for learning and building scheduled data-processing pipelines. The `dags/` directory is the primary location for workflow development.
